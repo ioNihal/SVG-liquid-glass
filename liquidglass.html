@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Liquid Glass Effect - HTML Experiment</title>
+    <style>
+        /* RESET & BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        /* BODY & MAIN VIEWPORT */
+        body {
+            min-height: 100vh;
+            background-color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* DEMO SECTION - Glass Card Container */
+        .demo-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* GLASS CARD STYLING */
+        .glass-card-container {
+            position: fixed;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: grab;
+        }
+
+        .glass-card-container.dragging {
+            cursor: grabbing;
+        }
+
+        /* Main glass card element */
+        .glass-card {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            padding: 2rem;
+            background: rgba(225, 239, 255, 0.151);
+            color: rgb(80, 80, 80);
+            border-radius: 24px;
+            box-shadow:
+                0 0 10px rgba(0, 0, 0, 0.1),
+                inset 0 1px 2px rgba(255, 255, 255, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        /* Refraction layer with SVG filter effect */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(2px) brightness(1.1);
+            -webkit-backdrop-filter: blur(2px) brightness(1.1);
+            filter: url(#light-bender);
+            transform: translateZ(0);
+        }
+
+        .glass-card h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin: 0;
+        }
+
+        /* ANIMATED TEXT */
+        .moving-text {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            width: 100%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 9rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            animation: moveText 20s linear infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes moveText {
+            0% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(500px);
+            }
+        }
+
+        /* INFORMATION SECTION */
+        .info-section {
+            width: 100%;
+            background: #f5f5f5;
+            padding: 3rem 2rem;
+        }
+
+        .info-container {
+            max-width: 900px;
+            margin: 0 auto;
+            font-family: system-ui, sans-serif;
+            color: #333;
+        }
+
+        .info-section a {
+            color: #1e3a8a;
+            text-decoration: underline;
+        }
+
+        .info-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #1e3a8a;
+        }
+
+        .info-section h3 {
+            font-size: 1.3rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            color: #0f172a;
+        }
+
+        .info-section p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .code-block {
+            background: #0f172a;
+            color: #60a5fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "-";
+            position: absolute;
+            left: 0;
+            color: #1e3a8a;
+            font-weight: bold;
+        }
+
+        .control-info {
+            background: #e0f2fe;
+            border-left: 4px solid #1e3a8a;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        /* SVG FILTER CONTAINER - Hidden */
+        .svg-filter-container {
+            position: absolute;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- MAIN DEMO: Liquid Glass Card -->
+    <div class="demo-container">
+        <!-- Animated background text -->
+        <p class="moving-text">Moving Text here</p>
+
+        <!-- Draggable glass card -->
+        <div class="glass-card-container">
+            <div class="glass-card">
+                <h1>Refractive Glass</h1>
+            </div>
+        </div>
+
+        <!-- SVG Filter Definitions -->
+        <svg class="svg-filter-container" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="light-bender" x="-20%" y="-20%" width="140%" height="140%">
+                    <!-- Step 1: Generate organic fractal noise pattern -->
+                    <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="1" result="noise" />
+
+                    <!-- Step 2: Smooth noise to create liquid-like curves -->
+                    <feGaussianBlur in="noise" stdDeviation="2" result="blurredNoise" />
+
+                    <!-- Step 3: Displace pixels using smoothed noise for refraction effect -->
+                    <feDisplacementMap in="SourceGraphic" in2="blurredNoise" scale="50" xChannelSelector="R"
+                        yChannelSelector="G" />
+                </filter>
+            </defs>
+        </svg>
+    </div>
+
+    <!-- INFORMATION & DOCUMENTATION SECTION -->
+    <section class="info-section" id="infoSection">
+        <div class="info-container">
+            <h2>How SVG Liquid Glass Works</h2>
+            <p>This project creates a liquid glass refraction effect using HTML, CSS, and SVG filters. Light appears to
+                bend through an organic, curved surface.</p>
+
+            <h3>Key Components</h3>
+            <ul class="feature-list">
+                <li><strong>feTurbulence</strong> - generates fractal noise patterns</li>
+                <li><strong>feGaussianBlur</strong> - smooths the noise for a liquid look</li>
+                <li><strong>feDisplacementMap</strong> - bends pixels using the noise as a displacement map</li>
+                <li><strong>backdrop-filter</strong> - adds the CSS glass morphism effect</li>
+                <li><strong>JavaScript dragging</strong> - makes the card interactive</li>
+            </ul>
+
+            <h3>SVG Filter Breakdown</h3>
+            <div class="code-block">
+                &lt;filter id="light-bender"&gt;
+                &lt;feTurbulence type="fractalNoise"
+                baseFrequency="0.008" numOctaves="1" /&gt;
+                &lt;feGaussianBlur stdDeviation="2" /&gt;
+                &lt;feDisplacementMap scale="50"
+                xChannelSelector="R" yChannelSelector="G" /&gt;
+                &lt;/filter&gt;
+            </div>
+
+            <h3>Parameters</h3>
+            <div class="control-info">
+                <strong>baseFrequency="0.008"</strong><br>
+                Controls the scale of the noise. Lower values give larger, smoother waves; higher values give more
+                chaotic detail.
+            </div>
+            <div class="control-info">
+                <strong>stdDeviation="2"</strong><br>
+                Controls blur smoothness. Higher values smooth the distortion; lower values preserve fine detail.
+            </div>
+            <div class="control-info">
+                <strong>scale="50"</strong><br>
+                Sets the intensity of the refraction. Higher values bend light more dramatically.
+            </div>
+
+            <h3>Glass Card Color</h3>
+            <p>The card uses a semi-transparent blue tint, <code>rgba(225, 239, 255, 0.226)</code>, combined with:</p>
+            <ul class="feature-list">
+                <li>An inner glow from an inset shadow</li>
+                <li>A subtle outer shadow for depth</li>
+                <li>CSS backdrop-filter for the browser-native glass effect</li>
+                <li>An SVG filter for the refraction itself</li>
+            </ul>
+
+            <h3>Interaction</h3>
+            <ul class="feature-list">
+                <li>Drag the card anywhere on the screen</li>
+                <li>Cursor shows grab on hover, grabbing while dragging</li>
+                <li>Background text animates continuously</li>
+            </ul>
+
+            <h3>Browser Support</h3>
+            <ul class="feature-list">
+                <li>Chrome and Edge: full support</li>
+                <li>Firefox: full support</li>
+                <li>Safari: full support</li>
+                <li>Internet Explorer: not supported</li>
+            </ul>
+
+            <h3>Performance Notes</h3>
+            <p>The SVG filter is GPU-accelerated on modern browsers. For best performance:</p>
+            <ul class="feature-list">
+                <li>Keep the filter region adjustment minimal</li>
+                <li>Avoid applying filters to large elements</li>
+                <li>Use <code>transform: translateZ(0)</code> for hardware acceleration</li>
+                <li>Test on target devices for frame rate consistency</li>
+            </ul>
+
+            <h3>Customization</h3>
+            <ul class="feature-list">
+                <li>Glass color: change the <code>rgba(225, 239, 255, 0.226)</code> value</li>
+                <li>More refraction: raise the <code>scale</code> attribute in feDisplacementMap</li>
+                <li>Smoother waves: lower the <code>baseFrequency</code> value</li>
+                <li>More liquid effect: increase <code>stdDeviation</code></li>
+                <li>Text animation: edit the <code>moveText</code> keyframe</li>
+            </ul>
+
+            <h3>File Structure</h3>
+            <p>Single-file HTML project, fully self-contained:</p>
+            <div class="code-block">
+                liquidglass.html
+                head - metadata and CSS
+                body
+                demo container
+                draggable glass card
+                SVG filter definitions
+                JavaScript for interactivity
+            </div>
+
+            <h3>About</h3>
+            <p>Built by <a href="https://github.com/ioNihal" target="_blank" rel="noopener">Nihal</a>.<br> Code on
+                GitHub:
+                <a href="https://github.com/ioNihal/svg-liquid-glass" target="_blank"
+                    rel="noopener">github.com/ioNihal/svg-liquid-glass</a>
+            </p>
+        </div>
+    </section>
+    </div>
+    </section>
+
+    <!-- MISC: Only Dragging Functionality -->
+    <script>
+        // Draggable glass card implementation
+        const glassContainer = document.querySelector('.glass-card-container');
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Start dragging
+        glassContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            glassContainer.classList.add('dragging');
+
+            const rect = glassContainer.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+        });
+
+        // Drag movement
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            // Calculate new position relative to viewport
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+
+            // Apply new position
+            glassContainer.style.left = x + 'px';
+            glassContainer.style.top = y + 'px';
+            glassContainer.style.transform = 'translate(0, 0)';
+        });
+
+        // Stop dragging
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            glassContainer.classList.remove('dragging');
+        });
+    </script>
+
+</body>
+
+</html>
